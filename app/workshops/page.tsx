@@ -45,7 +45,7 @@ export default function WorkshopsPage() {
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-8 flex-grow flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                    <div className="p-8 grow flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div>
                                             <h3 className="text-3xl font-black uppercase mb-2 group-hover:text-blue-600 transition-colors">{ws.title}</h3>
                                             <p className="text-gray-600 font-bold text-sm mb-4 md:mb-0">

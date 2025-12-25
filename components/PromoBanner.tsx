@@ -101,7 +101,7 @@ export default function PromoBanner() {
                                     <span className="text-xs text-gray-500 font-medium mb-1">{currentBanner.ctaSub}</span>
                                     <span className="text-lg">{currentBanner.cta}</span>
                                 </span>
-                                <span className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center transition-transform group-hover:rotate-[-45deg]`}>
+                                <span className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center transition-transform group-hover:-rotate-45`}>
                                     <FaArrowRight />
                                 </span>
                             </Link>

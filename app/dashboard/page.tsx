@@ -9,7 +9,7 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen bg-gray-50 flex font-sans text-black">
             {/* Sidebar - LMS Style */}
-            <aside className="w-64 bg-black text-white flex-shrink-0 flex flex-col fixed h-full z-20">
+            <aside className="w-64 bg-black text-white shrink-0 flex flex-col fixed h-full z-20">
                 <div className="p-6 border-b border-gray-800">
                     <Link href="/" className="text-xl font-bold tracking-tighter uppercase block">
                         Let's Dance <span className="text-blue-600">.</span>

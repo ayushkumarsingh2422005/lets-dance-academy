@@ -74,7 +74,7 @@ export default function CourseContent({ syllabus, isPurchased = false, notificat
             {/* TAB: CONTENT (Syllabus) */}
             {activeTab === 'content' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-black to-gray-600 w-fit">Course Modules</h2>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 bg-clip-text text-transparent bg-linear-to-r from-black to-gray-600 w-fit">Course Modules</h2>
                     {syllabus.map((module: SyllabusTopic, i: number) => {
                         const isExpanded = expandedModules.includes(i);
                         return (

@@ -65,7 +65,7 @@ export default function WorkshopContent({ chapters, isPurchased = false, notific
             {/* TAB: CONTENT (Chapters) */}
             {activeTab === 'content' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-black to-gray-600 w-fit">Workshop Chapters</h2>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 bg-clip-text text-transparent bg-linear-to-r from-black to-gray-600 w-fit">Workshop Chapters</h2>
                     {chapters.map((chapter, i) => (
                         <div key={i} className="border border-gray-200 bg-gray-50 flex justify-between items-center p-6 group hover:border-black transition-colors">
                             <div>

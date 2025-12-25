@@ -40,10 +40,10 @@ export default function BatchesPage() {
                                         <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                                     </div>
 
-                                    <div className="p-8 flex flex-col flex-grow">
+                                    <div className="p-8 flex flex-col grow">
                                         <span className="text-xs font-mono text-gray-400 mb-2 block font-bold">0{i + 1}</span>
                                         <h3 className="text-3xl font-black uppercase mb-4 group-hover:text-blue-600 transition-colors">{batch.title}</h3>
-                                        <p className="text-gray-600 text-sm mb-8 leading-relaxed font-medium flex-grow">
+                                        <p className="text-gray-600 text-sm mb-8 leading-relaxed font-medium grow">
                                             {batch.desc}
                                         </p>
 

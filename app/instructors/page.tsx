@@ -35,7 +35,7 @@ export default function InstructorsPage() {
                                         <Image src={inst.image} alt={inst.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
                                     </div>
 
-                                    <div className="p-8 flex flex-col flex-grow bg-white border-t border-gray-100">
+                                    <div className="p-8 flex flex-col grow bg-white border-t border-gray-100">
                                         <h3 className="text-2xl font-black uppercase mb-1 group-hover:text-blue-600 transition-colors">{inst.name}</h3>
                                         <p className="text-blue-600 text-xs font-bold uppercase tracking-widest mb-4">{inst.role}</p>
                                         <p className="text-gray-600 text-sm leading-relaxed">
