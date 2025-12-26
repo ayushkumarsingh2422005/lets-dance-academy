@@ -1,49 +1,71 @@
-
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { FaBars, FaXmark } from 'react-icons/fa6';
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'workshops' | 'attendance' | 'notifications'>('overview');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-50 flex font-sans text-black">
-            {/* Sidebar - LMS Style */}
-            <aside className="w-64 bg-black text-white shrink-0 flex flex-col fixed h-full z-20">
-                <div className="p-6 border-b border-gray-800">
+
+            {/* Mobile Header */}
+            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-black text-white z-50 flex items-center justify-between px-6 border-b border-gray-800">
+                <div className="flex items-center gap-4">
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                        {isSidebarOpen ? <FaXmark className="w-6 h-6" /> : <FaBars className="w-6 h-6" />}
+                    </button>
+                    <span className="font-bold uppercase tracking-tight">Student Portal</span>
+                </div>
+                <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
+            </header>
+
+            {/* Sidebar Overlay */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+
+            {/* Sidebar */}
+            <aside className={`w-64 bg-black text-white shrink-0 flex flex-col fixed h-full z-50 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+                }`}>
+                <div className="p-6 border-b border-gray-800 mt-16 md:mt-0">
                     <Link href="/" className="text-xl font-bold tracking-tighter uppercase block">
                         Let's Dance <span className="text-blue-600">.</span>
                     </Link>
                     <span className="text-xs text-gray-500 font-mono mt-1 block">STUDENT PORTAL</span>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     <button
-                        onClick={() => setActiveTab('overview')}
+                        onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide flex items-center gap-3 hover:bg-neutral-800 transition-colors ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
                     >
                         <span>📊</span> Overview
                     </button>
                     <button
-                        onClick={() => setActiveTab('courses')}
+                        onClick={() => { setActiveTab('courses'); setIsSidebarOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide flex items-center gap-3 hover:bg-neutral-800 transition-colors ${activeTab === 'courses' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
                     >
                         <span>💃</span> My Batches
                     </button>
                     <button
-                        onClick={() => setActiveTab('workshops')}
+                        onClick={() => { setActiveTab('workshops'); setIsSidebarOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide flex items-center gap-3 hover:bg-neutral-800 transition-colors ${activeTab === 'workshops' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
                     >
                         <span>🎫</span> Workshops
                     </button>
                     <button
-                        onClick={() => setActiveTab('attendance')}
+                        onClick={() => { setActiveTab('attendance'); setIsSidebarOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide flex items-center gap-3 hover:bg-neutral-800 transition-colors ${activeTab === 'attendance' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
                     >
                         <span>📅</span> Attendance
                     </button>
                     <button
-                        onClick={() => setActiveTab('notifications')}
+                        onClick={() => { setActiveTab('notifications'); setIsSidebarOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-sm font-bold uppercase tracking-wide flex items-center gap-3 hover:bg-neutral-800 transition-colors ${activeTab === 'notifications' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}
                     >
                         <span>🔔</span> Notifications
@@ -63,10 +85,10 @@ export default function DashboardPage() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-64 p-8">
-                <header className="flex justify-between items-center mb-12">
+            <main className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full">
+                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 md:mb-12">
                     <div>
-                        <h1 className="text-3xl font-black uppercase tracking-tighter">
+                        <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">
                             {activeTab === 'overview' && 'Dashboard Overview'}
                             {activeTab === 'courses' && 'My Active Batches'}
                             {activeTab === 'workshops' && 'Upcoming Workshops'}
@@ -75,7 +97,7 @@ export default function DashboardPage() {
                         </h1>
                         <p className="text-gray-500 text-sm font-bold mt-1">Welcome back, ready to move?</p>
                     </div>
-                    <Link href="/batches" className="bg-black text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors">
+                    <Link href="/batches" className="bg-black text-center text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors">
                         Browse New Courses
                     </Link>
                 </header>
@@ -98,9 +120,9 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Recent Activity / Next Class */}
-                        <div className="md:col-span-2 bg-white p-8 border border-gray-200">
+                        <div className="md:col-span-2 bg-white p-6 md:p-8 border border-gray-200">
                             <h3 className="text-xl font-black uppercase mb-6">Up Next</h3>
-                            <div className="flex items-center gap-6 border-l-4 border-blue-600 pl-6 py-2">
+                            <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 border-l-4 border-blue-600 pl-6 py-2">
                                 <div>
                                     <p className="text-3xl font-black leading-none">TODAY</p>
                                     <p className="text-gray-500 font-bold text-sm">6:00 PM</p>
@@ -109,7 +131,7 @@ export default function DashboardPage() {
                                     <h4 className="text-xl font-bold uppercase">Hip Hop Fundamentals</h4>
                                     <p className="text-gray-600 text-sm">Hall A • Instructor: Alex D.</p>
                                 </div>
-                                <button className="ml-auto bg-black text-white px-6 py-2 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
+                                <button className="md:ml-auto bg-black text-white px-6 py-2 text-xs font-bold uppercase hover:bg-blue-600 transition-colors w-fit">
                                     Check In
                                 </button>
                             </div>
@@ -146,8 +168,8 @@ export default function DashboardPage() {
                                         </div>
                                         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">45% Syllabus Completed</span>
                                     </div>
-                                    <div className="flex gap-4 mt-6">
-                                        <Link href="/batches/hip-hop" className="bg-black text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
+                                    <div className="flex flex-col md:flex-row gap-4 mt-6">
+                                        <Link href="/batches/hip-hop" className="bg-black text-center text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
                                             Continue Learning
                                         </Link>
                                         <button className="border border-gray-300 px-6 py-3 text-xs font-bold uppercase hover:border-black transition-colors">
@@ -191,8 +213,8 @@ export default function DashboardPage() {
 
                 {/* TAB: ATTENDANCE */}
                 {activeTab === 'attendance' && (
-                    <div className="bg-white border border-gray-200 p-8">
-                        <div className="flex justify-between items-center mb-8">
+                    <div className="bg-white border border-gray-200 p-4 md:p-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                             <h2 className="text-xl font-black uppercase">Attendance History</h2>
                             <div className="flex gap-2 text-sm font-bold">
                                 <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-full"></span> Present</span>
@@ -200,29 +222,32 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Simple Calendar Grid Mockup */}
-                        <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 mb-6">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                <div key={day} className="bg-gray-50 p-2 text-center text-xs font-bold uppercase text-gray-500">{day}</div>
-                            ))}
-                            {[...Array(30)].map((_, i) => {
-                                const day = i + 1;
-                                // Mocking status
-                                const isClassDay = [1, 3, 5].includes((i + 1) % 7); // Mon, Wed, Fri roughly
-                                const isPresent = isClassDay && Math.random() > 0.2;
-                                const isAbsent = isClassDay && !isPresent;
+                        {/* Calendar Grid - Mobile Scroll */}
+                        <div className="overflow-x-auto pb-4">
+                            <div className="min-w-[600px]">
+                                <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 mb-6">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                        <div key={day} className="bg-gray-50 p-2 text-center text-xs font-bold uppercase text-gray-500">{day}</div>
+                                    ))}
+                                    {[...Array(30)].map((_, i) => {
+                                        const day = i + 1;
+                                        // Mocking status
+                                        const isClassDay = [1, 3, 5].includes((i + 1) % 7); // Mon, Wed, Fri roughly
+                                        const isPresent = isClassDay && Math.random() > 0.2;
 
-                                return (
-                                    <div key={i} className="bg-white h-24 p-2 relative group hover:bg-gray-50 transition-colors">
-                                        <span className="font-bold text-sm">{day}</span>
-                                        {isClassDay && (
-                                            <div className={`mt-2 text-[10px] font-bold uppercase px-1 py-0.5 ${isPresent ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {isPresent ? 'Present' : 'Absent'}
+                                        return (
+                                            <div key={i} className="bg-white h-24 p-2 relative group hover:bg-gray-50 transition-colors">
+                                                <span className="font-bold text-sm">{day}</span>
+                                                {isClassDay && (
+                                                    <div className={`mt-2 text-[10px] font-bold uppercase px-1 py-0.5 ${isPresent ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                        {isPresent ? 'Present' : 'Absent'}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                         <p className="text-xs text-gray-500 font-medium">Showing report for <span className="text-black font-bold">October 2025</span></p>
                     </div>
