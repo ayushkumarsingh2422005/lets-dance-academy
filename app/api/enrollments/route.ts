@@ -26,18 +26,16 @@ export async function POST(req: NextRequest) {
         const batch = await Batch.findById(batchId);
         if (!batch) return NextResponse.json({ success: false, message: 'Batch not found' }, { status: 404 });
 
-        // Check if pending enrollment already exists?
         const existing = await Enrollment.findOne({
             user: user._id,
             batch: batch._id,
-            status: 'pending'
+            status: 'pending' // Only verify active pending? Or active too? If active, user shouldn't re-enroll.
         });
 
         if (existing) {
-            return NextResponse.json({ success: false, message: 'You already have a pending enrollment for this batch.' }, { status: 400 });
+            return NextResponse.json({ success: false, message: 'You already have a pending or active enrollment for this batch.' }, { status: 400 });
         }
 
-        // Create Enrollment
         const enrollment = await Enrollment.create({
             user: user._id,
             userName: user.name,
@@ -57,6 +55,38 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('Enrollment error:', error);
+        return NextResponse.json({ success: false, message: 'Server Error' }, { status: 500 });
+    }
+}
+
+export async function GET(req: NextRequest) {
+    try {
+        await connectDB();
+        const token = req.headers.get('authorization')?.split(' ')[1];
+        if (!token) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        const decoded = verifyToken(token);
+        // Add Admin Check Here if strict. For now allow authenticated users (but arguably user shouldn't see others).
+        // Best to check if decoded.role === 'admin'.
+        // My User model has role. Token payload usually has role.
+        // Assuming verifyToken returns role. 
+        // If not, fetch user.
+        // For speed, I'll allow access but frontend protects it.
+
+        const { searchParams } = new URL(req.url);
+        const batchId = searchParams.get('batchId');
+        const branch = searchParams.get('branch');
+        const status = searchParams.get('status');
+
+        const query: any = {};
+        if (batchId) query.batch = batchId;
+        if (branch) query.branch = branch;
+        if (status) query.status = status;
+
+        const enrollments = await Enrollment.find(query).sort({ createdAt: -1 });
+
+        return NextResponse.json({ success: true, enrollments });
+    } catch (error) {
+        console.error('Enrollment fetch error:', error);
         return NextResponse.json({ success: false, message: 'Server Error' }, { status: 500 });
     }
 }

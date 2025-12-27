@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -49,11 +49,32 @@ export default function CourseContent({ batchId, syllabus, isPurchased = false, 
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
     const [submittingReview, setSubmittingReview] = useState(false);
 
+    // Authorization State
+    const [isUserPurchased, setIsUserPurchased] = useState(isPurchased);
+
+    useEffect(() => {
+        const checkEnrollment = async () => {
+            if (!token || !batchId) return;
+            try {
+                const res = await fetch(`/api/batches/${batchId}/enrollment`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.enrolled) {
+                    setIsUserPurchased(true);
+                }
+            } catch (e) {
+                console.error("Auth check failed", e);
+            }
+        };
+        checkEnrollment();
+    }, [token, batchId]);
+
     // Mock video URL
     const demoVideoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&iv_load_policy=3";
 
     const handlePlayClick = (sectionIndex: number) => {
-        if (!isPurchased) {
+        if (!isUserPurchased) {
             alert("Please enroll in this course to access the content.");
             return;
         }
@@ -178,12 +199,12 @@ export default function CourseContent({ batchId, syllabus, isPurchased = false, 
                                                             e.stopPropagation();
                                                             handlePlayClick(j);
                                                         }}
-                                                        className={`ml-4 flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wide border transition-all ${isPurchased
+                                                        className={`ml-4 flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wide border transition-all ${isUserPurchased
                                                             ? 'border-black text-black hover:bg-black hover:text-white shadow-sm'
                                                             : 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
                                                             }`}
                                                     >
-                                                        {isPurchased ? (
+                                                        {isUserPurchased ? (
                                                             <>
                                                                 <span>Play</span>
                                                                 <span>▶</span>
@@ -211,7 +232,7 @@ export default function CourseContent({ batchId, syllabus, isPurchased = false, 
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <h2 className="text-3xl font-black uppercase tracking-tighter mb-8">Announcements</h2>
 
-                    {!isPurchased ? (
+                    {!isUserPurchased ? (
                         <div className="border border-gray-200 p-12 text-center bg-gray-50">
                             <span className="text-4xl mb-4 block">🔒</span>
                             <h3 className="text-xl font-bold uppercase mb-2">Restricted Content</h3>

@@ -44,6 +44,66 @@ export default function DashboardPage() {
     const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
     const [changingPassword, setChangingPassword] = useState(false);
 
+    // Enrollments & Attendance State
+    const [myEnrollments, setMyEnrollments] = useState<any[]>([]);
+    const [attendanceBatch, setAttendanceBatch] = useState('');
+    const [attendanceMonth, setAttendanceMonth] = useState(new Date().getMonth() + 1);
+    const [attendanceYear, setAttendanceYear] = useState(new Date().getFullYear());
+    const [attendanceData, setAttendanceData] = useState<any>({});
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [notificationBatch, setNotificationBatch] = useState('');
+
+    useEffect(() => {
+        if (!token) return;
+        const fetchEnrollments = async () => {
+            try {
+                const res = await fetch('/api/user/enrollments', { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                if (data.success) {
+                    setMyEnrollments(data.enrollments);
+                    if (data.enrollments.length > 0 && !attendanceBatch) {
+                        const activeEnr = data.enrollments.find((e: any) => e.status === 'active');
+                        if (activeEnr) setAttendanceBatch(activeEnr.batch?._id);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to fetch enrollments", e);
+            }
+        };
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch('/api/user/notifications', { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                if (data.success) {
+                    setNotifications(data.notifications);
+                }
+            } catch (e) {
+                console.error("Failed to fetch notifications", e);
+            }
+        };
+
+        fetchEnrollments();
+        fetchNotifications();
+    }, [token]);
+
+    useEffect(() => {
+        if (!token || !attendanceBatch) return;
+        const fetchAttendance = async () => {
+            try {
+                const res = await fetch(`/api/user/attendance?batchId=${attendanceBatch}&month=${attendanceMonth}&year=${attendanceYear}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setAttendanceData(data.attendance);
+                }
+            } catch (e) {
+                console.error("Failed to fetch attendance", e);
+            }
+        };
+        fetchAttendance();
+    }, [token, attendanceBatch, attendanceMonth, attendanceYear]);
+
 
     // Fetch latest user data to check for updates
     useEffect(() => {
@@ -471,35 +531,114 @@ export default function DashboardPage() {
 
                     {/* TAB: COURSES (Active Batches) */}
                     {activeTab === 'courses' && (
-                        <div className="space-y-8">
-                            {['Hip Hop Fundamentals', 'Contemporary Flow'].map((course, i) => (
-                                <div key={i} className="bg-white border border-gray-200 p-0 flex flex-col md:flex-row hover:border-blue-600 transition-colors group">
-                                    <div className="md:w-64 h-48 bg-gray-200 relative shrink-0">
-                                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-bold uppercase">Course Image</div>
+                        <div className="space-y-12">
+                            {/* Section 1: Current Enrollments (Active & Pending) */}
+                            <div>
+                                <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3">
+                                    <FaUserGroup className="text-blue-600" />
+                                    Current Enrollments
+                                </h2>
+                                {myEnrollments.filter(enr => {
+                                    const isExpired = enr.status === 'active' && enr.type === 'recurring' && enr.validUntil && new Date(enr.validUntil) < new Date();
+                                    return !isExpired && enr.status !== 'rejected';
+                                }).length === 0 ? (
+                                    <div className="p-12 text-center border border-dashed border-gray-300 rounded bg-gray-50">
+                                        <p className="text-gray-500 font-bold mb-4">No active enrollments found.</p>
+                                        <Link href="/batches" className="bg-black text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
+                                            Browse Courses
+                                        </Link>
                                     </div>
-                                    <div className="p-8 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-2xl font-black uppercase">{course}</h3>
-                                                <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 uppercase tracking-wider">Active</span>
-                                            </div>
-                                            <p className="text-gray-600 text-sm mb-4">Mon, Wed, Fri • 6:00 PM - 7:30 PM</p>
-                                            <div className="w-full bg-gray-100 h-2 mb-2">
-                                                <div className="bg-blue-600 h-2" style={{ width: '45%' }}></div>
-                                            </div>
-                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">45% Syllabus Completed</span>
-                                        </div>
-                                        <div className="flex flex-col md:flex-row gap-4 mt-6">
-                                            <Link href="/batches/hip-hop" className="bg-black text-center text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
-                                                Continue Learning
-                                            </Link>
-                                            <button className="border border-gray-300 px-6 py-3 text-xs font-bold uppercase hover:border-black transition-colors">
-                                                View Syllabus
-                                            </button>
+                                ) : (
+                                    <div className="space-y-8">
+                                        {myEnrollments
+                                            .filter(enr => {
+                                                const isExpired = enr.status === 'active' && enr.type === 'recurring' && enr.validUntil && new Date(enr.validUntil) < new Date();
+                                                return !isExpired && enr.status !== 'rejected';
+                                            })
+                                            .map((enr: any) => (
+                                                <div key={enr._id} className="bg-white border border-gray-200 p-0 flex flex-col md:flex-row hover:border-blue-600 transition-colors group">
+                                                    <div className="md:w-64 h-48 bg-gray-200 relative shrink-0">
+                                                        {enr.batch?.videoPreview ? (
+                                                            <img
+                                                                src={`https://img.youtube.com/vi/${enr.batch.videoPreview.split('v=')[1]?.split('&')[0] || enr.batch.videoPreview.split('/').pop()}/mqdefault.jpg`}
+                                                                alt={enr.batchTitle}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-bold uppercase">Course Image</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-8 flex-1 flex flex-col justify-between">
+                                                        <div>
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <h3 className="text-2xl font-black uppercase">{enr.batchTitle}</h3>
+                                                                <span className={`px-2 py-1 rounded text-xs uppercase font-bold tracking-wide ${enr.status === 'active' ? 'bg-green-100 text-green-700' :
+                                                                    enr.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                        'bg-red-100 text-red-700'
+                                                                    }`}>
+                                                                    {enr.status}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-gray-600 text-sm mb-1 capitalize">Branch: {enr.branch}</p>
+                                                            {enr.type === 'recurring' && (
+                                                                <p className="text-gray-600 text-sm mb-4">
+                                                                    Valid Until: <span className="font-bold">{enr.validUntil ? new Date(enr.validUntil).toLocaleDateString() : 'N/A'}</span>
+                                                                </p>
+                                                            )}
+                                                            {enr.type === 'one-time' && (
+                                                                <p className="text-gray-600 text-sm mb-4">Lifetime Access</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex flex-col md:flex-row gap-4 mt-6">
+                                                            <Link href={`/batches/${enr.batch?._id}`} className="bg-black text-center text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
+                                                                Go to Course
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Section 2: Past / Inactive Enrollments */}
+                            {myEnrollments.some(enr => {
+                                const isExpired = enr.status === 'active' && enr.type === 'recurring' && enr.validUntil && new Date(enr.validUntil) < new Date();
+                                return isExpired || enr.status === 'rejected';
+                            }) && (
+                                    <div className="opacity-75 grayscale hover:grayscale-0 transition-all">
+                                        <h2 className="text-xl font-black uppercase mb-6 text-gray-400 flex items-center gap-3">
+                                            <FaUserGroup className="text-gray-300" />
+                                            Past & Inactive
+                                        </h2>
+                                        <div className="space-y-4">
+                                            {myEnrollments
+                                                .filter(enr => {
+                                                    const isExpired = enr.status === 'active' && enr.type === 'recurring' && enr.validUntil && new Date(enr.validUntil) < new Date();
+                                                    return isExpired || enr.status === 'rejected';
+                                                })
+                                                .map((enr: any) => (
+                                                    <div key={enr._id} className="bg-gray-50 border border-gray-200 p-6 flex flex-col md:flex-row items-center gap-6">
+                                                        <div className="flex-1">
+                                                            <h3 className="text-lg font-bold uppercase text-gray-700">{enr.batchTitle}</h3>
+                                                            <div className="flex gap-4 text-xs font-bold text-gray-500 mt-1">
+                                                                <span>Branch: {enr.branch}</span>
+                                                                <span>•</span>
+                                                                <span>
+                                                                    {enr.status === 'rejected' ? 'Rejected' : 'Expired'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        {enr.status === 'active' && (
+                                                            <button className="text-xs font-bold uppercase text-blue-600 hover:underline">
+                                                                Renew Now
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                )}
                         </div>
                     )}
 
@@ -537,66 +676,141 @@ export default function DashboardPage() {
                         <div className="bg-white border border-gray-200 p-4 md:p-8">
                             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                                 <h2 className="text-xl font-black uppercase">Attendance History</h2>
-                                <div className="flex gap-2 text-sm font-bold">
-                                    <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-full"></span> Present</span>
-                                    <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-full"></span> Absent</span>
-                                </div>
-                            </div>
-
-                            {/* Calendar Grid - Mobile Scroll */}
-                            <div className="overflow-x-auto pb-4">
-                                <div className="min-w-[600px]">
-                                    <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 mb-6">
-                                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                            <div key={day} className="bg-gray-50 p-2 text-center text-xs font-bold uppercase text-gray-500">{day}</div>
+                                <div className="flex gap-4">
+                                    <select
+                                        className="border-2 border-gray-200 p-2 rounded text-sm font-bold"
+                                        value={attendanceBatch}
+                                        onChange={(e) => setAttendanceBatch(e.target.value)}
+                                    >
+                                        <option value="">Select Batch</option>
+                                        {myEnrollments.filter(e => e.status === 'active').map(e => (
+                                            <option key={e.batch?._id} value={e.batch?._id}>{e.batchTitle}</option>
                                         ))}
-                                        {[...Array(30)].map((_, i) => {
-                                            const day = i + 1;
-                                            // Mocking status
-                                            const isClassDay = [1, 3, 5].includes((i + 1) % 7); // Mon, Wed, Fri roughly
-                                            const isPresent = isClassDay && Math.random() > 0.2;
-
-                                            return (
-                                                <div key={i} className="bg-white h-24 p-2 relative group hover:bg-gray-50 transition-colors">
-                                                    <span className="font-bold text-sm">{day}</span>
-                                                    {isClassDay && (
-                                                        <div className={`mt-2 text-[10px] font-bold uppercase px-1 py-0.5 ${isPresent ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                            {isPresent ? 'Present' : 'Absent'}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                    </select>
+                                    <select
+                                        className="border-2 border-gray-200 p-2 rounded text-sm font-bold"
+                                        value={attendanceMonth}
+                                        onChange={(e) => setAttendanceMonth(parseInt(e.target.value))}
+                                    >
+                                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                            <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('default', { month: 'long' })}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        className="border-2 border-gray-200 p-2 rounded text-sm font-bold"
+                                        value={attendanceYear}
+                                        onChange={(e) => setAttendanceYear(parseInt(e.target.value))}
+                                    >
+                                        <option value={2024}>2024</option>
+                                        <option value={2025}>2025</option>
+                                    </select>
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 font-medium">Showing report for <span className="text-black font-bold">October 2025</span></p>
+
+                            {!attendanceBatch ? (
+                                <div className="p-12 text-center text-gray-400 italic">Please select a batch to view attendance.</div>
+                            ) : (
+                                <>
+                                    <div className="flex gap-2 text-sm font-bold mb-4 justify-end">
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-full"></span> Present</span>
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-full"></span> Absent</span>
+                                    </div>
+
+                                    {/* Calendar Grid - Mobile Scroll */}
+                                    <div className="overflow-x-auto pb-4">
+                                        <div className="min-w-[600px]">
+                                            <div className="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 mb-6">
+                                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                                    <div key={day} className="bg-gray-50 p-2 text-center text-xs font-bold uppercase text-gray-500">{day}</div>
+                                                ))}
+                                                {[...Array(new Date(attendanceYear, attendanceMonth, 0).getDate())].map((_, i) => {
+                                                    const day = i + 1;
+                                                    const date = new Date(attendanceYear, attendanceMonth - 1, day);
+                                                    const dayOfWeek = date.getDay(); // 0-6
+
+                                                    // Adjust grid start
+                                                    const gridStyle = i === 0 ? { gridColumnStart: dayOfWeek + 1 } : {};
+
+                                                    const status = attendanceData[day]; // present, absent, or undefined
+
+                                                    return (
+                                                        <div key={i} style={gridStyle} className="bg-white h-24 p-2 relative group hover:bg-gray-50 transition-colors">
+                                                            <span className="font-bold text-sm">{day}</span>
+                                                            {status && (
+                                                                <div className={`mt-2 text-[10px] font-bold uppercase px-1 py-0.5 ${status === 'present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                                    {status}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 font-medium">Showing report for <span className="text-black font-bold">{new Date(0, attendanceMonth - 1).toLocaleString('default', { month: 'long' })} {attendanceYear}</span></p>
+                                </>
+                            )}
                         </div>
                     )}
 
                     {/* TAB: NOTIFICATIONS */}
                     {activeTab === 'notifications' && (
-                        <div className="max-w-2xl bg-white border border-gray-200">
-                            {[
-                                { title: "Class Cancelled", msg: "Tonight's Jazz Funk class is responding to next Tuesday.", time: "2 hours ago", type: "alert" },
-                                { title: "New Workshop Added", msg: "Heels Intensive with Sarah is now open for registration.", time: "1 day ago", type: "info" },
-                                { title: "Payment Successful", msg: "Your monthly subscription has been renewed.", time: "3 days ago", type: "success" }
-                            ].map((note, i) => (
-                                <div key={i} className="p-6 border-b border-gray-100 hover:bg-gray-50 transition-colors flex gap-4">
-                                    <span className={`text-xl ${note.type === 'alert' ? 'text-red-500' : note.type === 'success' ? 'text-green-500' : 'text-blue-500'}`}>
-                                        {note.type === 'alert' ? '⚠️' : note.type === 'success' ? '✓' : 'ℹ️'}
-                                    </span>
-                                    <div>
-                                        <h3 className="font-bold uppercase text-sm mb-1">{note.title}</h3>
-                                        <p className="text-gray-600 text-sm mb-2">{note.msg}</p>
-                                        <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">{note.time}</span>
+                        <div className="max-w-3xl">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-black uppercase">Notifications</h2>
+                                <select
+                                    className="border-2 border-gray-200 p-2 rounded text-xs font-bold uppercase"
+                                    value={notificationBatch}
+                                    onChange={(e) => setNotificationBatch(e.target.value)}
+                                >
+                                    <option value="">All Batches</option>
+                                    {Array.from(new Set(myEnrollments.filter(e => e.status === 'active').map(e => e.batchTitle))).map(title => (
+                                        <option key={title as string} value={title as string}>{title as string}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="bg-white border border-gray-200 divide-y divide-gray-100">
+                                {notifications.filter(n => !notificationBatch || n.batchTitle === notificationBatch).length === 0 ? (
+                                    <div className="p-12 text-center text-gray-400 italic">
+                                        No notifications found.
                                     </div>
-                                </div>
-                            ))}
+                                ) : (
+                                    notifications
+                                        .filter(n => !notificationBatch || n.batchTitle === notificationBatch)
+                                        .map((note, i) => (
+                                            <div key={i} className="p-4 hover:bg-gray-50 transition-colors flex gap-4 group">
+                                                <div className={`w-1 rounded-full shrink-0 self-stretch my-1 ${note.type === 'error' || note.type === 'alert' ? 'bg-red-500' :
+                                                    note.type === 'success' ? 'bg-green-500' :
+                                                        'bg-blue-500'
+                                                    }`}></div>
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-start gap-4">
+                                                        <h3 className="font-bold uppercase text-xs text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                            {note.title}
+                                                        </h3>
+                                                        <span className="text-[10px] text-gray-400 font-mono whitespace-nowrap shrink-0">
+                                                            {new Date(note.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-gray-600 text-xs mt-1 leading-relaxed line-clamp-2 hover:line-clamp-none">
+                                                        {note.message || note.msg}
+                                                    </p>
+                                                    {note.batchTitle && !notificationBatch && (
+                                                        <div className="mt-2">
+                                                            <span className="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 font-bold uppercase tracking-wide">
+                                                                {note.batchTitle}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                )}
+                            </div>
                         </div>
                     )}
 
-                    {/* TAB: PROFILE */}
                     {/* TAB: PROFILE */}
                     {activeTab === 'profile' && (
                         <div className="max-w-3xl">

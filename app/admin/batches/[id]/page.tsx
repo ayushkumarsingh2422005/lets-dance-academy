@@ -1,9 +1,10 @@
+
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { FaPencil, FaArrowLeft, FaGraduationCap, FaClock, FaIndianRupeeSign, FaBell, FaComments, FaStar, FaPlay, FaListCheck, FaCircleInfo, FaUsers } from 'react-icons/fa6';
-import { FaTimes } from 'react-icons/fa';
+import { FaPencil, FaArrowLeft, FaGraduationCap, FaClock, FaIndianRupeeSign, FaBell, FaComments, FaStar, FaPlay, FaListCheck, FaCircleInfo, FaUsers, FaCheck, FaXmark } from 'react-icons/fa6';
+import { FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 
 export default function ViewBatchPage() {
     const { id } = useParams();
@@ -11,6 +12,8 @@ export default function ViewBatchPage() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
     const [videoModal, setVideoModal] = useState<string | null>(null);
+    const [enrollments, setEnrollments] = useState<any[]>([]);
+    const [loadingEnrollments, setLoadingEnrollments] = useState(false);
 
     useEffect(() => {
         const fetchBatch = async () => {
@@ -19,8 +22,6 @@ export default function ViewBatchPage() {
                 const data = await res.json();
                 if (data.success) {
                     setBatch(data.data.batch);
-                } else {
-                    // Handle error
                 }
             } catch (e) {
                 console.error(e);
@@ -30,6 +31,55 @@ export default function ViewBatchPage() {
         };
         if (id) fetchBatch();
     }, [id]);
+
+    const fetchEnrollments = async () => {
+        if (!id) return;
+        setLoadingEnrollments(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/enrollments?batchId=${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setEnrollments(data.enrollments);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingEnrollments(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'students') {
+            fetchEnrollments();
+        }
+    }, [activeTab, id]);
+
+    const updateEnrollmentStatus = async (enrollmentId: string, status: string) => {
+        if (!confirm(`Are you sure you want to mark this enrollment as ${status}?`)) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/enrollments/${enrollmentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchEnrollments();
+                alert(`Enrollment marked as ${status}`);
+            } else {
+                alert(data.message);
+            }
+        } catch (e) {
+            alert('Error updating status');
+        }
+    };
 
     const getEmbedUrl = (url: string) => {
         if (!url) return '';
@@ -100,44 +150,45 @@ export default function ViewBatchPage() {
                                 <p className="whitespace-pre-wrap leading-relaxed text-gray-700">{batch.description}</p>
                             </div>
                         </div>
-                        <div className="lg:col-span-1 space-y-6">
-                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                                {batch.coverImage && (
-                                    <div className="relative group cursor-pointer" onClick={() => batch.videoPreview && setVideoModal(batch.videoPreview)}>
-                                        <img src={batch.coverImage} className="w-full aspect-video object-cover rounded-lg mb-6" alt="Cover" />
-                                        {/* Play icon overlay for preview video if exists */}
-                                        {batch.videoPreview && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors rounded-lg">
-                                                <FaPlay className="text-white w-10 h-10 drop-shadow-lg opacity-80 group-hover:scale-110 transition-transform" />
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                                        <span className="text-gray-400 text-xs font-bold uppercase">Price</span>
-                                        <span className="font-black text-xl flex items-center gap-1">
-                                            <FaIndianRupeeSign className="w-4 h-4" />
-                                            {batch.price === 0 ? 'Free' : batch.price}
-                                            {batch.pricingType === 'recurring' && <span className="text-xs font-normal text-gray-400">/mo</span>}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                                        <span className="text-gray-400 text-xs font-bold uppercase">Level</span>
-                                        <span className="font-bold text-sm flex items-center gap-2"><FaGraduationCap className="text-gray-300" /> {batch.level}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                                        <span className="text-gray-400 text-xs font-bold uppercase">Duration</span>
-                                        <span className="font-bold text-sm flex items-center gap-2"><FaClock className="text-gray-300" /> {batch.duration}</span>
-                                    </div>
-                                    {batch.schedule && (
-                                        <div className="pt-2">
-                                            <span className="text-gray-400 text-xs font-bold uppercase block mb-1">Schedule</span>
-                                            <span className="font-bold text-sm block">{batch.schedule}</span>
-                                        </div>
-                                    )}
+                        <div>
+                            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                                <div className="flex items-center gap-4 text-gray-700">
+                                    <FaClock />
+                                    <span className="font-bold text-sm">Duration:</span>
+                                    <span>{batch.duration}</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-gray-700">
+                                    <FaIndianRupeeSign />
+                                    <span className="font-bold text-sm">Price:</span>
+                                    <span>{batch.price}</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-gray-700">
+                                    <FaGraduationCap />
+                                    <span className="font-bold text-sm">Level:</span>
+                                    <span>{batch.level}</span>
                                 </div>
                             </div>
+
+                            {batch.videoPreview && (
+                                <div className="mt-6">
+                                    <h3 className="font-bold uppercase tracking-wide mb-2 text-xs text-gray-400">Preview</h3>
+                                    <div
+                                        className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative group cursor-pointer"
+                                        onClick={() => setVideoModal(batch.videoPreview)}
+                                    >
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-black group-hover:scale-110 transition-transform shadow-lg">
+                                                <FaPlay className="ml-1" />
+                                            </div>
+                                        </div>
+                                        <img
+                                            src={`https://img.youtube.com/vi/${batch.videoPreview.split('v=')[1] ? batch.videoPreview.split('v=')[1].split('&')[0] : batch.videoPreview.split('/').pop()}/mqdefault.jpg`}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -145,37 +196,30 @@ export default function ViewBatchPage() {
                 {activeTab === 'curriculum' && (
                     <div className="max-w-4xl animate-fade-in">
                         <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-                            <h3 className="font-bold uppercase tracking-wide mb-6 text-sm text-gray-400">Curriculum Structure</h3>
                             <div className="space-y-4">
                                 {batch.modules?.map((module: any, i: number) => (
-                                    <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
-                                        <div className="bg-gray-50 px-6 py-4 font-bold flex justify-between">
-                                            <span>{module.title}</span>
+                                    <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+                                        <div className="bg-gray-50 p-4 font-bold flex justify-between items-center">
+                                            <span>Module {i + 1}: {module.title}</span>
                                             <span className="text-xs bg-white border px-2 py-1 rounded text-gray-500 uppercase">{module.sections?.length || 0} Lessons</span>
                                         </div>
                                         <div className="divide-y divide-gray-100">
                                             {module.sections?.map((section: any, j: number) => (
-                                                <div key={j} className="px-6 py-3 text-sm flex items-center justify-between text-gray-700 hover:bg-gray-50 group">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold shrink-0">{j + 1}</span>
-                                                        <span>{section.title}</span>
-                                                        {section.isFree && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded uppercase font-bold">Free</span>}
+                                                <div key={j} className="p-4 flex items-center gap-3 text-sm hover:bg-gray-50 transition-colors">
+                                                    <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                                        {j + 1}
                                                     </div>
-
-                                                    {section.videoUrl && (
-                                                        <button
-                                                            onClick={() => setVideoModal(section.videoUrl)}
-                                                            className="flex items-center gap-2 text-xs font-bold uppercase bg-gray-100 px-3 py-1.5 rounded text-gray-600 hover:bg-black hover:text-white transition-colors"
-                                                        >
-                                                            <FaPlay className="w-3 h-3" /> Play Video
-                                                        </button>
-                                                    )}
+                                                    <span>{section.title}</span>
+                                                    {section.isFree && <span className="ml-auto text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Free Preview</span>}
                                                 </div>
                                             ))}
+                                            {(!module.sections || module.sections.length === 0) && (
+                                                <div className="p-4 text-center text-gray-400 text-xs italic">No lessons in this module</div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
-                                {(!batch.modules || batch.modules.length === 0) && <p className="text-gray-400 italic">No curriculum added yet.</p>}
+                                {(!batch.modules || batch.modules.length === 0) && <p className="text-gray-400 italic text-sm">No curriculum added yet.</p>}
                             </div>
                         </div>
                     </div>
@@ -186,17 +230,17 @@ export default function ViewBatchPage() {
                         <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
                             <div className="space-y-6">
                                 {batch.reviews?.map((review: any, i: number) => (
-                                    <div key={i} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                                    <div key={i} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
                                         <div className="flex justify-between items-start mb-2">
-                                            <div className="font-bold text-sm">{review.userName}</div>
-                                            <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
+                                            <div className="font-bold">{review.userName}</div>
+                                            <div className="text-yellow-500 text-xs flex gap-0.5">
+                                                {[...Array(5)].map((_, s) => (
+                                                    <FaStar key={s} className={s < review.rating ? 'text-yellow-400' : 'text-gray-200'} />
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="flex text-yellow-400 text-xs mb-2">
-                                            {[...Array(5)].map((_, stars) => (
-                                                <FaStar key={stars} className={stars < review.rating ? "text-yellow-400" : "text-gray-200"} />
-                                            ))}
-                                        </div>
-                                        <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                                        <div className="text-gray-600 text-sm leading-relaxed">"{review.comment}"</div>
+                                        <div className="text-xs text-gray-400 mt-2">{new Date(review.createdAt).toLocaleDateString()}</div>
                                     </div>
                                 ))}
                                 {(!batch.reviews || batch.reviews.length === 0) && <p className="text-gray-400 italic text-sm">No reviews yet.</p>}
@@ -227,18 +271,90 @@ export default function ViewBatchPage() {
                         </div>
                     </div>
                 )}
+
                 {activeTab === 'students' && (
-                    <div className="max-w-4xl animate-fade-in">
-                        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm text-center py-20">
-                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FaUsers className="text-gray-400 text-2xl" />
+                    <div className="animate-fade-in">
+                        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="font-bold text-lg">Enrolled Students</h3>
+                                <div className="text-sm font-bold bg-gray-100 px-3 py-1 rounded">Total: {enrollments.length}</div>
                             </div>
-                            <h3 className="font-bold text-lg mb-2">Enrolled Students</h3>
-                            <p className="text-gray-500 mb-6">Student enrollment management and tracking will be implemented here.</p>
-                            <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg font-bold text-sm">
-                                <span>Total Enrolled:</span>
-                                <span>0</span>
-                            </div>
+
+                            {loadingEnrollments ? (
+                                <div className="text-center py-8 text-gray-500">Loading students...</div>
+                            ) : enrollments.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400 italic">No students enrolled in this batch yet.</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-gray-200 text-xs text-gray-400 uppercase tracking-widest">
+                                                <th className="py-4 font-bold">Student</th>
+                                                <th className="py-4 font-bold">Contact</th>
+                                                <th className="py-4 font-bold">Branch</th>
+                                                <th className="py-4 font-bold">Joined</th>
+                                                <th className="py-4 font-bold">Screenshot</th>
+                                                <th className="py-4 font-bold">Status</th>
+                                                <th className="py-4 font-bold text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {enrollments.map(enr => (
+                                                <tr key={enr._id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors text-sm">
+                                                    <td className="py-4">
+                                                        <div className="font-bold">{enr.userName}</div>
+                                                        <div className="text-xs text-gray-400">{enr.userEmail}</div>
+                                                    </td>
+                                                    <td className="py-4">{enr.userPhone || '-'}</td>
+                                                    <td className="py-4 capitalize">
+                                                        {enr.branch === 'sambhaji-nagar' ? 'Sambhaji Nagar' : 'Balaji Nagar'}
+                                                    </td>
+                                                    <td className="py-4 text-gray-500">{new Date(enr.paymentDate || enr.createdAt).toLocaleDateString()}</td>
+                                                    <td className="py-4">
+                                                        <a
+                                                            href={enr.screenshot}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-xs uppercase"
+                                                        >
+                                                            View <FaExternalLinkAlt size={10} />
+                                                        </a>
+                                                    </td>
+                                                    <td className="py-4">
+                                                        <span className={`px-2 py-1 rounded text-xs uppercase font-bold tracking-wide ${enr.status === 'active' ? 'bg-green-100 text-green-700' :
+                                                                enr.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                    enr.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                                                            }`}>{enr.status}</span>
+                                                    </td>
+                                                    <td className="py-4 text-right">
+                                                        {enr.status === 'pending' && (
+                                                            <div className="flex justify-end gap-2">
+                                                                <button
+                                                                    onClick={() => updateEnrollmentStatus(enr._id, 'active')}
+                                                                    className="bg-green-500 text-white p-2 rounded hover:bg-green-600 transition-colors"
+                                                                    title="Approve"
+                                                                >
+                                                                    <FaCheck />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => updateEnrollmentStatus(enr._id, 'rejected')}
+                                                                    className="bg-red-500 text-white p-2 rounded hover:bg-red-600 transition-colors"
+                                                                    title="Reject"
+                                                                >
+                                                                    <FaXmark />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                        {enr.status !== 'pending' && (
+                                                            <span className="text-gray-300 text-xs italic">Processed</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

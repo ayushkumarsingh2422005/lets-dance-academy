@@ -16,10 +16,10 @@ export default async function BatchDetailsPage({ params }: { params: Promise<{ i
     let batch = null;
     try {
         if (id.match(/^[0-9a-fA-F]{24}$/)) {
-            batch = await Batch.findOne({ _id: id, status: 'published' }).populate('reviews.user', 'name profilePicture');
+            batch = await Batch.findOne({ _id: id, status: 'published' }).populate({ path: 'reviews.user', model: User, select: 'name profilePicture' });
         }
         if (!batch) {
-            batch = await Batch.findOne({ slug: id, status: 'published' }).populate('reviews.user', 'name profilePicture');
+            batch = await Batch.findOne({ slug: id, status: 'published' }).populate({ path: 'reviews.user', model: User, select: 'name profilePicture' });
         }
     } catch (e) {
         console.error("Batch fetch error", e);
