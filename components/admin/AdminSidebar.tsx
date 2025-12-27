@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import {
     FaChartPie,
     FaUserGroup,
@@ -10,6 +11,8 @@ import {
     FaMoneyBillWave,
     FaLayerGroup,
     FaImages,
+    FaBullhorn,
+    FaUserShield,
     FaGear,
     FaArrowRightFromBracket,
     FaBars,
@@ -22,13 +25,16 @@ const menuItems = [
     { icon: FaCalendarCheck, label: 'Attendance', href: '/admin/attendance' },
     { icon: FaMoneyBillWave, label: 'Payments & Dues', href: '/admin/payments' },
     { icon: FaLayerGroup, label: 'Courses & Batches', href: '/admin/courses' },
-    { icon: FaImages, label: 'Banners & Content', href: '/admin/content' },
+    { icon: FaBullhorn, label: 'Promo Banners', href: '/admin/banners' },
+    // { icon: FaImages, label: 'Content', href: '/admin/content' },
+    { icon: FaUserShield, label: 'Manage Admins', href: '/admin/admins' },
     { icon: FaGear, label: 'Settings', href: '/admin/settings' },
 ];
 
 export default function AdminSidebar() {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
+    const { logout } = useAuth();
 
     // Close sidebar on route change (mobile)
     useEffect(() => {
@@ -75,8 +81,8 @@ export default function AdminSidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                                        : 'text-gray-400 hover:text-white hover:bg-neutral-900'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                    : 'text-gray-400 hover:text-white hover:bg-neutral-900'
                                     }`}
                             >
                                 <item.icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-white'}`} />
@@ -88,7 +94,10 @@ export default function AdminSidebar() {
 
                 {/* Bottom Actions */}
                 <div className="p-4 border-t border-neutral-800">
-                    <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors">
+                    <button
+                        onClick={logout}
+                        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors"
+                    >
                         <FaArrowRightFromBracket className="w-4 h-4" />
                         <span className="text-sm font-bold tracking-wide">Logout</span>
                     </button>

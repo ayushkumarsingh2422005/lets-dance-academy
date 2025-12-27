@@ -3,12 +3,31 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FaBars, FaXmark } from 'react-icons/fa6';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
+    const { user, isAuthenticated, isAdmin, logout } = useAuth();
+
+    // Don't show header on admin pages
+    if (pathname.startsWith('/admin')) {
+        return null;
+    }
+
+    // Redirect admins to admin panel if they try to access non-admin pages
+    // Allow only login/register pages for logged out state
+    useEffect(() => {
+        if (isAdmin && isAuthenticated) {
+            const publicPages = ['/login', '/register', '/forgot-password'];
+            if (!publicPages.includes(pathname)) {
+                router.push('/admin');
+            }
+        }
+    }, [isAdmin, isAuthenticated, pathname, router]);
 
     // Close menu when route changes
     useEffect(() => {
@@ -35,6 +54,11 @@ export default function Header() {
         { href: '/studio', label: 'Studio' },
     ];
 
+    const handleLogout = () => {
+        logout();
+        setIsMenuOpen(false);
+    };
+
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -57,12 +81,34 @@ export default function Header() {
                 </nav>
 
                 <div className="flex items-center gap-4">
-                    <Link href="/login" className="hidden md:block text-sm font-bold text-gray-600 hover:text-black uppercase tracking-wide">
-                        Login
-                    </Link>
-                    <Link href="/register" className="hidden md:block bg-black text-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide hover:bg-gray-800 transition-colors rounded-none">
-                        Join Now
-                    </Link>
+                    {isAuthenticated && !isAdmin ? (
+                        // Regular user is logged in - show Dashboard
+                        <>
+                            <Link
+                                href="/dashboard"
+                                className="hidden md:block text-sm font-bold text-gray-600 hover:text-black uppercase tracking-wide"
+                            >
+                                Dashboard
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="hidden md:block bg-black text-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide hover:bg-red-600 transition-colors rounded-none"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : !isAuthenticated ? (
+                        // Not logged in - show Login & Join Now
+                        <>
+                            <Link href="/login" className="hidden md:block text-sm font-bold text-gray-600 hover:text-black uppercase tracking-wide">
+                                Login
+                            </Link>
+                            <Link href="/register" className="hidden md:block bg-black text-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide hover:bg-blue-600 transition-colors rounded-none">
+                                Join Now
+                            </Link>
+                        </>
+                    ) : null}
+                    {/* Note: If admin is logged in and browsing public site, show nothing */}
 
                     {/* Mobile Menu Button */}
                     <button
@@ -95,20 +141,42 @@ export default function Header() {
                             );
                         })}
                         <div className="flex flex-col gap-4 mt-8">
-                            <Link
-                                href="/login"
-                                className="text-xl font-bold uppercase tracking-wide text-gray-600"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                Login
-                            </Link>
-                            <Link
-                                href="/register"
-                                className="bg-black text-white px-6 py-4 text-center text-sm font-bold uppercase tracking-wide rounded-none"
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                Join Now
-                            </Link>
+                            {isAuthenticated && !isAdmin ? (
+                                // Regular user logged in
+                                <>
+                                    <Link
+                                        href="/dashboard"
+                                        className="text-xl font-bold uppercase tracking-wide text-gray-600"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="bg-red-600 text-white px-6 py-4 text-center text-sm font-bold uppercase tracking-wide rounded-none"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            ) : !isAuthenticated ? (
+                                // Not logged in
+                                <>
+                                    <Link
+                                        href="/login"
+                                        className="text-xl font-bold uppercase tracking-wide text-gray-600"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        className="bg-black text-white px-6 py-4 text-center text-sm font-bold uppercase tracking-wide rounded-none"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Join Now
+                                    </Link>
+                                </>
+                            ) : null}
                         </div>
                     </nav>
                 </div>
