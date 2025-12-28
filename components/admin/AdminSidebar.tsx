@@ -18,13 +18,15 @@ import {
     FaBars,
     FaXmark
 } from 'react-icons/fa6';
+import { GrWorkshop } from "react-icons/gr";
 
 const menuItems = [
     { icon: FaChartPie, label: 'Dashboard', href: '/admin' },
     { icon: FaUserGroup, label: 'Students', href: '/admin/students' },
     { icon: FaCalendarCheck, label: 'Attendance', href: '/admin/attendance' },
     { icon: FaMoneyBillWave, label: 'Payments & Dues', href: '/admin/payments' },
-    { icon: FaLayerGroup, label: 'Courses & Batches', href: '/admin/batches' },
+    { icon: FaLayerGroup, label: 'Courses', href: '/admin/batches' },
+    { icon: GrWorkshop, label: 'Workshops', href: '/admin/workshops' },
     { icon: FaBullhorn, label: 'Promo Banners', href: '/admin/banners' },
     // { icon: FaImages, label: 'Content', href: '/admin/content' },
     { icon: FaUserShield, label: 'Manage Admins', href: '/admin/admins' },

@@ -6,8 +6,10 @@ export interface IEnrollment extends Document {
     userName: string;
     userEmail: string;
     userPhone?: string;
-    batch: mongoose.Types.ObjectId;
-    batchTitle: string;
+    batch?: mongoose.Types.ObjectId;
+    batchTitle?: string;
+    workshop?: mongoose.Types.ObjectId;
+    workshopTitle?: string;
     branch: string;
     screenshot: string;
     status: 'pending' | 'active' | 'expired' | 'rejected';
@@ -24,8 +26,10 @@ const EnrollmentSchema = new Schema<IEnrollment>({
     userName: { type: String, required: true },
     userEmail: { type: String, required: true },
     userPhone: { type: String },
-    batch: { type: Schema.Types.ObjectId, ref: 'Batch', required: true },
-    batchTitle: { type: String, required: true },
+    batch: { type: Schema.Types.ObjectId, ref: 'Batch' },
+    batchTitle: { type: String },
+    workshop: { type: Schema.Types.ObjectId, ref: 'Workshop' },
+    workshopTitle: { type: String },
     branch: { type: String, required: true },
     screenshot: { type: String, required: true },
     status: {

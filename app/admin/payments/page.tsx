@@ -122,7 +122,7 @@ export default function AdminPaymentsPage() {
                                 <thead className="bg-gray-50 text-xs text-gray-400 uppercase tracking-widest font-bold">
                                     <tr>
                                         <th className="px-6 py-4">Student</th>
-                                        <th className="px-6 py-4">Course/Batch</th>
+                                        <th className="px-6 py-4">Course/Workshop</th>
                                         <th className="px-6 py-4">Amount</th>
                                         <th className="px-6 py-4">Payment Date</th>
                                         <th className="px-6 py-4">Valid Until</th>
@@ -137,12 +137,22 @@ export default function AdminPaymentsPage() {
                                                 <div className="text-xs text-gray-400">{e.userEmail}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-medium">{e.batchTitle}</div>
+                                                <div className="font-medium">{e.batchTitle || e.workshopTitle}</div>
                                                 <div className="text-xs text-gray-400 capitalize">{e.branch} Branch</div>
-                                                <div className="text-xs text-gray-400 capitalize mt-1">
+                                                <div className="text-xs text-gray-400 capitalize mt-1 flex items-center gap-2">
                                                     <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${e.type === 'recurring' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                                                         {e.type}
                                                     </span>
+                                                    {e.workshopTitle && (
+                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700">
+                                                            Workshop
+                                                        </span>
+                                                    )}
+                                                    {e.batchTitle && (
+                                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700">
+                                                            Batch
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 font-bold">₹{e.price}</td>
@@ -161,8 +171,8 @@ export default function AdminPaymentsPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded text-xs uppercase font-bold tracking-wide ${e.status === 'active' ? 'bg-green-100 text-green-700' :
-                                                        e.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                            e.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                                                    e.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                        e.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                     {e.status}
                                                 </span>

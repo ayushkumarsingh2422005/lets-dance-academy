@@ -1,0 +1,302 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { FaLocationDot, FaCheck, FaXmark, FaUpload, FaArrowRight } from 'react-icons/fa6';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+
+const branches = [
+    {
+        id: 'sambhaji-nagar',
+        name: 'Sambhaji Nagar Branch',
+        address: 'Sambhaji Nagar Road, Dhankwadi, near by Suyog Hospital, Pune 411043'
+    },
+    {
+        id: 'balaji-nagar',
+        name: 'Balaji Nagar Branch',
+        address: 'Balaji Nagar, Dhankawade Patil Township, near by Siddhi Hospital, Pune 411043'
+    }
+];
+
+export default function WorkshopEnrollment({ workshopId, price }: { workshopId: string, price: string }) {
+    const { token, user } = useAuth();
+    const router = useRouter();
+    const [isOpen, setIsOpen] = useState(false);
+    const [step, setStep] = useState(1);
+    const [selectedBranch, setSelectedBranch] = useState(branches[0]);
+    const [screenshot, setScreenshot] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Enrollment Status State
+    const [enrollmentStatus, setEnrollmentStatus] = useState<{ enrolled: boolean, status: string | null } | null>(null);
+    const [checkingStatus, setCheckingStatus] = useState(true);
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            if (!token || !workshopId) {
+                setCheckingStatus(false);
+                return;
+            }
+            try {
+                const res = await fetch(`/api/workshops/${workshopId}/enrollment`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setEnrollmentStatus(data);
+                }
+            } catch (error) {
+                console.error("Status check failed", error);
+            } finally {
+                setCheckingStatus(false);
+            }
+        };
+        checkStatus();
+    }, [token, workshopId, step]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                setScreenshot(data.data.url);
+            } else {
+                alert('Upload failed: ' + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Upload failed');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!token) {
+            alert('Please login to register');
+            return;
+        }
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/enrollments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ workshopId, branch: selectedBranch.id, screenshot })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setStep(4);
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert('Error registering');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleEnrollClick = () => {
+        if (!token) {
+            alert('Please Login First');
+            return;
+        }
+        setIsOpen(true);
+    };
+
+    const getButtonContent = () => {
+        if (checkingStatus) return 'Loading...';
+        if (enrollmentStatus?.status === 'active') return 'Already Registered';
+        if (enrollmentStatus?.status === 'pending') return 'Verification Pending';
+        if (enrollmentStatus?.status === 'rejected') return 'Registration Rejected - Try Again';
+        return `Register Now - ${price}`;
+    };
+
+    const isButtonDisabled = checkingStatus || enrollmentStatus?.status === 'active' || enrollmentStatus?.status === 'pending';
+
+    const getButtonStyle = () => {
+        if (enrollmentStatus?.status === 'active') return 'bg-green-600 text-white cursor-default hover:bg-green-700';
+        if (enrollmentStatus?.status === 'pending') return 'bg-yellow-500 text-white cursor-default hover:bg-yellow-600';
+        if (enrollmentStatus?.status === 'rejected') return 'bg-red-600 text-white hover:bg-red-700';
+        return 'bg-black text-white hover:bg-blue-600 transition-colors';
+    };
+
+    return (
+        <>
+            <button
+                onClick={handleEnrollClick}
+                disabled={isButtonDisabled}
+                className={`px-10 py-4 text-sm font-bold uppercase tracking-widest text-center w-full ${getButtonStyle()}`}
+            >
+                {getButtonContent()}
+            </button>
+
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white text-black max-w-lg w-full p-8 rounded-2xl relative shadow-2xl animate-in zoom-in-95 duration-200">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-6 right-6 text-gray-400 hover:text-black hover:bg-gray-100 p-2 rounded-full transition-all"
+                        >
+                            <FaXmark size={20} />
+                        </button>
+
+                        <div className="mb-8">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-blue-600 font-bold uppercase tracking-widest text-xs block">Step {step} of 3</span>
+                                {step < 4 && <div className="flex gap-1">
+                                    {[1, 2, 3].map(i => <div key={i} className={`h-1 w-8 rounded-full ${step >= i ? 'bg-blue-600' : 'bg-gray-200'}`} />)}
+                                </div>}
+                            </div>
+
+                            {step === 1 && <h3 className="text-3xl font-black uppercase">Select Campus</h3>}
+                            {step === 2 && <h3 className="text-3xl font-black uppercase">Payment Info</h3>}
+                            {step === 3 && <h3 className="text-3xl font-black uppercase">Verification</h3>}
+                            {step === 4 && <h3 className="text-3xl font-black uppercase text-green-600">Request Sent!</h3>}
+                        </div>
+
+                        {/* STEP 1: BRANCH SELECTION */}
+                        {step === 1 && (
+                            <div className="space-y-4 mb-8">
+                                <p className="text-gray-600 mb-4">Choose your preferred branch:</p>
+                                {branches.map((branch) => (
+                                    <button
+                                        key={branch.id}
+                                        onClick={() => setSelectedBranch(branch)}
+                                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start gap-4 relative group ${selectedBranch.id === branch.id
+                                            ? 'border-blue-600 bg-blue-50'
+                                            : 'border-gray-200 hover:border-blue-400 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${selectedBranch.id === branch.id ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'}`}>
+                                            {selectedBranch.id === branch.id && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                        <div>
+                                            <span className={`font-black uppercase tracking-wide block text-sm mb-1 ${selectedBranch.id === branch.id ? 'text-blue-900' : 'text-black'}`}>{branch.name}</span>
+                                            <span className="text-xs text-gray-500 font-medium leading-relaxed block">{branch.address}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => setStep(2)}
+                                    className="w-full bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors rounded-lg flex items-center justify-center gap-2 mt-4"
+                                >
+                                    Next: Payment <FaArrowRight />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* STEP 2: PAYMENT INFO */}
+                        {step === 2 && (
+                            <div className="space-y-6 mb-8">
+                                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center">
+                                    <div className="w-48 h-48 bg-gray-200 mx-auto mb-4 flex items-center justify-center text-gray-400 font-bold border-2 border-dashed border-gray-300">
+                                        UPI QR CODE
+                                    </div>
+                                    <p className="font-bold text-sm uppercase mb-1">Scan to Pay: {price}</p>
+                                    <p className="text-xs text-gray-500">Lets Dance Academy</p>
+                                </div>
+
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm">
+                                    <h4 className="font-bold uppercase text-blue-800 mb-2">Bank Details</h4>
+                                    <p>Account Name: <span className="font-bold">Lets Dance Academy</span></p>
+                                    <p>Account No: <span className="font-bold">1234567890</span></p>
+                                    <p>IFSC: <span className="font-bold">SBIN0001234</span></p>
+                                </div>
+
+                                <button
+                                    onClick={() => setStep(3)}
+                                    className="w-full bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors rounded-lg flex items-center justify-center gap-2"
+                                >
+                                    I have made the payment
+                                </button>
+                                <button onClick={() => setStep(1)} className="w-full text-center text-xs font-bold text-gray-400 hover:text-black mt-2">Back</button>
+                            </div>
+                        )}
+
+                        {/* STEP 3: UPLOAD SCREENSHOT */}
+                        {step === 3 && (
+                            <div className="space-y-6 mb-8">
+                                <p className="text-gray-600 text-sm">Please upload a screenshot of your payment for verification.</p>
+
+                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors relative">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleUpload}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        disabled={uploading}
+                                    />
+                                    {screenshot ? (
+                                        <div className="relative h-48 mx-auto">
+                                            <img src={screenshot} alt="Payment" className="h-full mx-auto object-contain rounded shadow-sm" />
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white font-bold text-xs uppercase">Change Image</div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2 text-gray-500">
+                                            {uploading ? <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full"></div> : <FaUpload size={32} />}
+                                            <span className="font-bold uppercase text-xs tracking-widest">{uploading ? 'Uploading...' : 'Click to Upload Screenshot'}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={!screenshot || submitting}
+                                    className={`w-full bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-green-600 transition-colors rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {submitting ? 'Submitting...' : 'Submit Registration'}
+                                </button>
+                                <button onClick={() => setStep(2)} className="w-full text-center text-xs font-bold text-gray-400 hover:text-black mt-2">Back</button>
+                            </div>
+                        )}
+
+                        {/* STEP 4: SUCCESS */}
+                        {step === 4 && (
+                            <div className="text-center py-8">
+                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                                    <FaCheck />
+                                </div>
+                                <h4 className="text-xl font-bold uppercase mb-2">Registration Pending</h4>
+                                <p className="text-gray-600 mb-8 max-w-sm mx-auto">
+                                    Your registration request has been submitted. The admin will verify your payment and activate your access shortly.
+                                </p>
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="w-full bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors rounded-lg"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}

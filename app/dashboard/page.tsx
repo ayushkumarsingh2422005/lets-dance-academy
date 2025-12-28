@@ -644,30 +644,88 @@ export default function DashboardPage() {
 
                     {/* TAB: WORKSHOPS */}
                     {activeTab === 'workshops' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Registered Workshop */}
-                            <div className="bg-white border-2 border-blue-600 p-6 relative overflow-hidden">
-                                <span className="bg-blue-600 text-white absolute top-0 right-0 px-3 py-1 text-xs font-bold uppercase">Registered</span>
-                                <span className="text-5xl font-black text-gray-100 absolute -bottom-4 -right-4 z-0">OCT 24</span>
-                                <div className="relative z-10">
-                                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Upcoming Event</p>
-                                    <h3 className="text-2xl font-black uppercase mb-1">Urban Choreography</h3>
-                                    <p className="text-gray-600 font-bold text-sm mb-6">Instructor: Alex D.</p>
-                                    <button className="w-full bg-black text-white py-3 text-xs font-bold uppercase hover:bg-gray-800 transition-colors">
-                                        View Ticket
-                                    </button>
-                                </div>
+                        <div className="space-y-12">
+                            {/* Section 1: Registered Workshops (Active & Pending) */}
+                            <div>
+                                <h2 className="text-xl font-black uppercase mb-6 flex items-center gap-3">
+                                    <FaCalendarDays className="text-blue-600" />
+                                    Registered Workshops
+                                </h2>
+                                {myEnrollments.filter(enr => enr.workshop && enr.status !== 'rejected').length === 0 ? (
+                                    <div className="p-12 text-center border border-dashed border-gray-300 rounded bg-gray-50">
+                                        <p className="text-gray-500 font-bold mb-4">No workshop registrations found.</p>
+                                        <Link href="/workshops" className="bg-black text-white px-6 py-3 text-xs font-bold uppercase hover:bg-blue-600 transition-colors">
+                                            Browse Workshops
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {myEnrollments
+                                            .filter(enr => enr.workshop && enr.status !== 'rejected')
+                                            .map((enr: any) => (
+                                                <div key={enr._id} className={`border-2 p-6 relative overflow-hidden ${enr.status === 'active' ? 'border-blue-600 bg-white' : 'border-yellow-500 bg-yellow-50'}`}>
+                                                    <span className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold uppercase ${enr.status === 'active' ? 'bg-blue-600 text-white' : 'bg-yellow-500 text-white'}`}>
+                                                        {enr.status}
+                                                    </span>
+                                                    <div className="relative z-10">
+                                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">
+                                                            {enr.status === 'active' ? 'Registered' : 'Pending Verification'}
+                                                        </p>
+                                                        <h3 className="text-2xl font-black uppercase mb-1">{enr.workshopTitle}</h3>
+                                                        <p className="text-gray-600 font-bold text-sm mb-2 capitalize">Branch: {enr.branch}</p>
+                                                        <p className="text-gray-600 text-sm mb-6">
+                                                            Registered: {new Date(enr.paymentDate || enr.createdAt).toLocaleDateString()}
+                                                        </p>
+                                                        {enr.status === 'active' ? (
+                                                            <Link
+                                                                href={`/workshops/${enr.workshop._id || enr.workshop}`}
+                                                                className="w-full block text-center bg-black text-white py-3 text-xs font-bold uppercase hover:bg-gray-800 transition-colors"
+                                                            >
+                                                                Access Workshop
+                                                            </Link>
+                                                        ) : (
+                                                            <div className="w-full text-center bg-gray-200 text-gray-600 py-3 text-xs font-bold uppercase cursor-not-allowed">
+                                                                Awaiting Approval
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Past Workshop */}
-                            <div className="bg-gray-50 border border-gray-200 p-6 opacity-75 hover:opacity-100 transition-opacity">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Past Event</span>
-                                <h3 className="text-xl font-bold uppercase mb-1">Heels 101</h3>
-                                <p className="text-gray-600 text-sm mb-6">September 15, 2025</p>
-                                <button className="w-full border border-gray-300 py-3 text-xs font-bold uppercase hover:bg-white transition-colors">
-                                    View Recording
-                                </button>
-                            </div>
+                            {/* Section 2: Rejected Workshops */}
+                            {myEnrollments.some(enr => enr.workshop && enr.status === 'rejected') && (
+                                <div className="opacity-75 grayscale hover:grayscale-0 transition-all">
+                                    <h2 className="text-xl font-black uppercase mb-6 text-gray-400 flex items-center gap-3">
+                                        <FaCalendarDays className="text-gray-300" />
+                                        Rejected Registrations
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {myEnrollments
+                                            .filter(enr => enr.workshop && enr.status === 'rejected')
+                                            .map((enr: any) => (
+                                                <div key={enr._id} className="bg-gray-50 border border-gray-200 p-6 flex flex-col md:flex-row items-center gap-6">
+                                                    <div className="flex-1">
+                                                        <h3 className="text-lg font-bold uppercase text-gray-700">{enr.workshopTitle}</h3>
+                                                        <div className="flex gap-4 text-xs font-bold text-gray-500 mt-1">
+                                                            <span>Branch: {enr.branch}</span>
+                                                            <span>•</span>
+                                                            <span>Rejected</span>
+                                                        </div>
+                                                    </div>
+                                                    <Link
+                                                        href={`/workshops/${enr.workshop._id || enr.workshop}`}
+                                                        className="text-xs font-bold uppercase text-blue-600 hover:underline"
+                                                    >
+                                                        Register Again
+                                                    </Link>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -763,21 +821,24 @@ export default function DashboardPage() {
                                     value={notificationBatch}
                                     onChange={(e) => setNotificationBatch(e.target.value)}
                                 >
-                                    <option value="">All Batches</option>
-                                    {Array.from(new Set(myEnrollments.filter(e => e.status === 'active').map(e => e.batchTitle))).map(title => (
+                                    <option value="">All Sources</option>
+                                    {Array.from(new Set(myEnrollments.filter(e => e.status === 'active' && e.batchTitle).map(e => e.batchTitle))).map(title => (
+                                        <option key={title as string} value={title as string}>{title as string}</option>
+                                    ))}
+                                    {Array.from(new Set(myEnrollments.filter(e => e.status === 'active' && e.workshopTitle).map(e => e.workshopTitle))).map(title => (
                                         <option key={title as string} value={title as string}>{title as string}</option>
                                     ))}
                                 </select>
                             </div>
 
                             <div className="bg-white border border-gray-200 divide-y divide-gray-100">
-                                {notifications.filter(n => !notificationBatch || n.batchTitle === notificationBatch).length === 0 ? (
+                                {notifications.filter(n => !notificationBatch || n.batchTitle === notificationBatch || n.workshopTitle === notificationBatch).length === 0 ? (
                                     <div className="p-12 text-center text-gray-400 italic">
                                         No notifications found.
                                     </div>
                                 ) : (
                                     notifications
-                                        .filter(n => !notificationBatch || n.batchTitle === notificationBatch)
+                                        .filter(n => !notificationBatch || n.batchTitle === notificationBatch || n.workshopTitle === notificationBatch)
                                         .map((note, i) => (
                                             <div key={i} className="p-4 hover:bg-gray-50 transition-colors flex gap-4 group">
                                                 <div className={`w-1 rounded-full shrink-0 self-stretch my-1 ${note.type === 'error' || note.type === 'alert' ? 'bg-red-500' :
@@ -796,11 +857,16 @@ export default function DashboardPage() {
                                                     <p className="text-gray-600 text-xs mt-1 leading-relaxed line-clamp-2 hover:line-clamp-none">
                                                         {note.message || note.msg}
                                                     </p>
-                                                    {note.batchTitle && !notificationBatch && (
-                                                        <div className="mt-2">
+                                                    {((note.batchTitle || note.workshopTitle) && !notificationBatch) && (
+                                                        <div className="mt-2 flex items-center gap-2">
                                                             <span className="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 font-bold uppercase tracking-wide">
-                                                                {note.batchTitle}
+                                                                {note.batchTitle || note.workshopTitle}
                                                             </span>
+                                                            {note.source && (
+                                                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide ${note.source === 'workshop' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                                                                    {note.source}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
