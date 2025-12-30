@@ -28,9 +28,9 @@ const menuItems = [
     { icon: FaLayerGroup, label: 'Courses', href: '/admin/batches' },
     { icon: GrWorkshop, label: 'Workshops', href: '/admin/workshops' },
     { icon: FaBullhorn, label: 'Promo Banners', href: '/admin/banners' },
-    // { icon: FaImages, label: 'Content', href: '/admin/content' },
+    { icon: FaImages, label: 'Gallery', href: '/admin/gallery' },
     { icon: FaUserShield, label: 'Manage Admins', href: '/admin/admins' },
-    { icon: FaGear, label: 'Settings', href: '/admin/settings' },
+    // { icon: FaGear, label: 'Settings', href: '/admin/settings' },
 ];
 
 export default function AdminSidebar() {
@@ -65,7 +65,7 @@ export default function AdminSidebar() {
             )}
 
             {/* Sidebar */}
-            <aside className={`w-64 bg-neutral-950 text-white flex-shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 border-r border-neutral-800 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            <aside className={`w-64 bg-neutral-950 text-white shrink-0 flex flex-col fixed inset-y-0 left-0 z-50 border-r border-neutral-800 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
                 }`}>
                 {/* Logo Area */}
                 <div className="p-6 border-b border-neutral-800 hidden md:block">

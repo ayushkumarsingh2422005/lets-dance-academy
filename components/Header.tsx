@@ -52,6 +52,7 @@ export default function Header() {
         { href: '/workshops', label: 'Workshops' },
         { href: '/instructors', label: 'Instructors' },
         { href: '/studio', label: 'Studio' },
+        { href: '/gallery', label: 'Gallery' },
     ];
 
     const handleLogout = () => {
