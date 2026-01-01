@@ -12,6 +12,7 @@ export interface IEnrollment extends Document {
     workshopTitle?: string;
     branch: string;
     screenshot: string;
+    utrNumber: string;
     status: 'pending' | 'active' | 'expired' | 'rejected';
     type: 'one-time' | 'recurring';
     price: number;
@@ -32,6 +33,7 @@ const EnrollmentSchema = new Schema<IEnrollment>({
     workshopTitle: { type: String },
     branch: { type: String, required: true },
     screenshot: { type: String, required: true },
+    utrNumber: { type: String, required: true },
     status: {
         type: String,
         enum: ['pending', 'active', 'expired', 'rejected'],

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { FaInstagram, FaYoutube, FaEnvelope, FaPhone } from 'react-icons/fa6';
+import { FaInstagram, FaYoutube, FaEnvelope, FaPhone, FaGoogle, FaWhatsapp } from 'react-icons/fa6';
 
 export default function Footer() {
     return (
@@ -24,18 +24,33 @@ export default function Footer() {
                         <h3 className="text-sm font-black uppercase tracking-widest mb-6 text-gray-900">Links</h3>
                         <ul className="space-y-4">
                             <li>
+                                <Link href="/" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                                    Home
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/batches" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
                                     Regular Batches
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/workshops" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
-                                    Weekend Workshops
+                                    Workshops
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/gallery" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                                    Gallery
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/timeline" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                                    Timeline
                                 </Link>
                             </li>
                             <li>
                                 <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
-                                    Student Dashboard
+                                    Dashboard
                                 </Link>
                             </li>
                         </ul>
@@ -44,6 +59,11 @@ export default function Footer() {
                     <div>
                         <h3 className="text-sm font-black uppercase tracking-widest mb-6 text-gray-900">Academy</h3>
                         <ul className="space-y-4">
+                            <li>
+                                <Link href="/about" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                                    About Us
+                                </Link>
+                            </li>
                             <li>
                                 <Link href="/instructors" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
                                     Instructors
@@ -55,8 +75,13 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
+                                    Login
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/register" className="text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium">
-                                    Join Now
+                                    Sign Up
                                 </Link>
                             </li>
                             <li>
@@ -96,21 +121,42 @@ export default function Footer() {
                             <a href="https://youtube.com/@prathameshmanedid?si=tTk9enmsRn_ayaAr" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors text-xs font-bold uppercase tracking-widest">
                                 <FaYoutube className="w-4 h-4" /> YouTube
                             </a>
+                            <a href="https://share.google/hmGWPSahsjK15ObSe" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors text-xs font-bold uppercase tracking-widest">
+                                <FaGoogle className="w-4 h-4" /> Google Reviews
+                            </a>
+                            <a href="https://wa.me/917448043738" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors text-xs font-bold uppercase tracking-widest">
+                                <FaWhatsapp className="w-4 h-4" /> WhatsApp
+                            </a>
                         </div>
                     </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-gray-500 text-xs uppercase tracking-wider font-bold">
-                        © {new Date().getFullYear()} Let's Dance Academy. All rights reserved. | <span className="text-gray-400">Created and maintained by <a href="https://digicraft.one" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">DigiCraft</a></span>
-                    </p>
-                    <div className="flex gap-6">
-                        <Link href="/privacy-policy" className="text-gray-500 hover:text-black text-xs uppercase tracking-wider transition-colors font-bold">
-                            Privacy Policy
-                        </Link>
-                        <Link href="/terms-of-service" className="text-gray-500 hover:text-black text-xs uppercase tracking-wider transition-colors font-bold">
-                            Terms of Service
-                        </Link>
+                <div className="border-t border-gray-200 pt-8 pb-4">
+                    {/* Copyright and Policy Links */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                        <p className="text-gray-900 text-sm font-bold uppercase tracking-wider">
+                            © {new Date().getFullYear()} Let's Dance Academy. All rights reserved.
+                        </p>
+                        <div className="flex gap-6">
+                            <Link href="/privacy-policy" className="text-gray-600 hover:text-blue-600 text-sm uppercase tracking-wider transition-colors font-bold">
+                                Privacy Policy
+                            </Link>
+                            <Link href="/terms-of-service" className="text-gray-600 hover:text-blue-600 text-sm uppercase tracking-wider transition-colors font-bold">
+                                Terms of Service
+                            </Link>
+                        </div>
+                    </div>
+
+
+                    {/* Design Credit & Advertisement - Combined */}
+                    <div className="text-center pt-4 border-t border-gray-100">
+                        <p className="text-gray-400 text-xs uppercase tracking-widest leading-relaxed">
+                            Designed and maintained by <a href="https://digicraft.one" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-600 transition-colors font-bold">DigiCraft</a>
+                            <span className="mx-3 text-gray-300">•</span>
+                            Need a website? <a href="https://digicraft.one" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors font-semibold">Visit us</a> or explore <a href="https://marketplace.digicraft.one" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors font-semibold">pre-built templates</a>
+                            <span className="mx-3 text-gray-300">•</span>
+                            Call <a href="tel:+918299797516" className="text-gray-400 hover:text-blue-400 transition-colors font-semibold">8299797516</a>
+                        </p>
                     </div>
                 </div>
             </div>

@@ -310,6 +310,7 @@ export default function ViewWorkshopPage() {
                                                 <th className="py-4 font-bold">Branch</th>
                                                 <th className="py-4 font-bold">Registered</th>
                                                 <th className="py-4 font-bold">Payment</th>
+                                                <th className="py-4 font-bold">UTR Number</th>
                                                 <th className="py-4 font-bold">Screenshot</th>
                                                 <th className="py-4 font-bold">Status</th>
                                                 <th className="py-4 font-bold text-right">Actions</th>
@@ -328,6 +329,9 @@ export default function ViewWorkshopPage() {
                                                     </td>
                                                     <td className="py-4 text-gray-500">{new Date(enr.paymentDate || enr.createdAt).toLocaleDateString()}</td>
                                                     <td className="py-4 font-bold">₹{enr.price}</td>
+                                                    <td className="py-4">
+                                                        <div className="font-mono text-xs font-bold text-gray-700">{enr.utrNumber || '-'}</div>
+                                                    </td>
                                                     <td className="py-4">
                                                         <a
                                                             href={enr.screenshot}

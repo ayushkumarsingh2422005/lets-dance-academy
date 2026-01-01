@@ -293,6 +293,7 @@ export default function ViewBatchPage() {
                                                 <th className="py-4 font-bold">Contact</th>
                                                 <th className="py-4 font-bold">Branch</th>
                                                 <th className="py-4 font-bold">Joined</th>
+                                                <th className="py-4 font-bold">UTR Number</th>
                                                 <th className="py-4 font-bold">Screenshot</th>
                                                 <th className="py-4 font-bold">Status</th>
                                                 <th className="py-4 font-bold text-right">Actions</th>
@@ -311,6 +312,9 @@ export default function ViewBatchPage() {
                                                     </td>
                                                     <td className="py-4 text-gray-500">{new Date(enr.paymentDate || enr.createdAt).toLocaleDateString()}</td>
                                                     <td className="py-4">
+                                                        <div className="font-mono text-xs font-bold text-gray-700">{enr.utrNumber || '-'}</div>
+                                                    </td>
+                                                    <td className="py-4">
                                                         <a
                                                             href={enr.screenshot}
                                                             target="_blank"
@@ -322,8 +326,8 @@ export default function ViewBatchPage() {
                                                     </td>
                                                     <td className="py-4">
                                                         <span className={`px-2 py-1 rounded text-xs uppercase font-bold tracking-wide ${enr.status === 'active' ? 'bg-green-100 text-green-700' :
-                                                                enr.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                                    enr.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
+                                                            enr.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                                enr.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
                                                             }`}>{enr.status}</span>
                                                     </td>
                                                     <td className="py-4 text-right">

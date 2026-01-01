@@ -26,6 +26,7 @@ export default function WorkshopEnrollment({ workshopId, price }: { workshopId: 
     const [step, setStep] = useState(1);
     const [selectedBranch, setSelectedBranch] = useState(branches[0]);
     const [screenshot, setScreenshot] = useState('');
+    const [utrNumber, setUtrNumber] = useState('');
     const [uploading, setUploading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -105,7 +106,7 @@ export default function WorkshopEnrollment({ workshopId, price }: { workshopId: 
             const res = await fetch('/api/enrollments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ workshopId, branch: selectedBranch.id, screenshot })
+                body: JSON.stringify({ workshopId, branch: selectedBranch.id, screenshot, utrNumber })
             });
             const data = await res.json();
             if (data.success) {
@@ -243,30 +244,47 @@ export default function WorkshopEnrollment({ workshopId, price }: { workshopId: 
                             <div className="space-y-6 mb-8">
                                 <p className="text-gray-600 text-sm">Please upload a screenshot of your payment for verification.</p>
 
-                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors relative">
+                                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors relative cursor-pointer">
                                     <input
                                         type="file"
                                         accept="image/*"
                                         onChange={handleUpload}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                         disabled={uploading}
                                     />
                                     {screenshot ? (
                                         <div className="relative h-48 mx-auto">
                                             <img src={screenshot} alt="Payment" className="h-full mx-auto object-contain rounded shadow-sm" />
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white font-bold text-xs uppercase">Change Image</div>
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity text-white font-bold text-xs uppercase pointer-events-none">
+                                                Click to Change Image
+                                            </div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center gap-2 text-gray-500">
+                                        <div className="flex flex-col items-center gap-2 text-gray-500 pointer-events-none">
                                             {uploading ? <div className="animate-spin w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full"></div> : <FaUpload size={32} />}
                                             <span className="font-bold uppercase text-xs tracking-widest">{uploading ? 'Uploading...' : 'Click to Upload Screenshot'}</span>
                                         </div>
                                     )}
                                 </div>
 
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+                                        UTR Number *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={utrNumber}
+                                        onChange={(e) => setUtrNumber(e.target.value)}
+                                        placeholder="Enter UTR/Transaction Reference Number"
+                                        className="w-full border-2 border-gray-300 rounded-lg p-4 text-sm font-bold focus:border-blue-600 focus:outline-none transition-colors placeholder:font-normal"
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">The UTR number can be found in your payment confirmation</p>
+                                </div>
+
                                 <button
                                     onClick={handleSubmit}
-                                    disabled={!screenshot || submitting}
+                                    disabled={!screenshot || !utrNumber || submitting}
                                     className={`w-full bg-black text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-green-600 transition-colors rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     {submitting ? 'Submitting...' : 'Submit Registration'}

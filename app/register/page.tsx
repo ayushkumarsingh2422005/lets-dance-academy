@@ -25,6 +25,11 @@ export default function RegisterPage() {
         setError('');
 
         // Validation
+        if (!phone.trim()) {
+            setError('Phone number is required');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -112,7 +117,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-                                Phone Number (Optional)
+                                Phone Number
                             </label>
                             <input
                                 type="tel"
@@ -120,6 +125,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder="+91 1234567890"
                                 className="w-full border-2 border-gray-200 p-4 text-sm font-bold focus:border-black focus:outline-none transition-colors rounded-none placeholder:font-normal"
+                                required
                             />
                         </div>
 

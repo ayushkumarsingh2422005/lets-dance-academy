@@ -5,7 +5,7 @@ import Achievements from '@/components/Achievements';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { FaInstagram, FaYoutube, FaEnvelope, FaPhone } from 'react-icons/fa6';
+import { FaInstagram, FaYoutube, FaEnvelope, FaPhone, FaMusic, FaVideo, FaHeart, FaBriefcase, FaTrophy, FaChalkboardUser } from 'react-icons/fa6';
 
 export default function StudioPage() {
     return (
@@ -43,6 +43,84 @@ export default function StudioPage() {
                             <div className="relative h-[600px] border border-gray-200">
                                 {/* Large Studio Image Placeholder */}
                                 <Image src="/hero.png" alt="Main Studio Hall" fill className="object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* SERVICES SECTION - DETAILED */}
+                <section className="py-24 bg-black text-white border-t border-gray-800">
+                    <div className="max-w-7xl mx-auto px-6">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">Our Services</h2>
+                            <div className="h-1 w-20 bg-blue-600 mx-auto"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {/* Service 1: Choreography */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaMusic size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Choreography</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Musicals, Concerts, Theatrical Acts, Dance Reality Shows, Award Shows, Serials, Advertisements - We bring your vision to life through expertly crafted dance sequences.
+                                </p>
+                            </div>
+
+                            {/* Service 2: Music Videos */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaVideo size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Music Videos</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Choreography for Music videos with Celebrities, Dance Music Video Collaboration. Professional production-ready choreography that captures attention.
+                                </p>
+                            </div>
+
+                            {/* Service 3: Wedding */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaHeart size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Wedding</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Choreography and Training for Sangeet & Wedding celebrations. Make your special day unforgettable with personalized dance performances.
+                                </p>
+                            </div>
+
+                            {/* Service 4: Corporate Events */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaBriefcase size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Corporate Events</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Performances for National & International Shows and Corporate Events. Professional entertainment that leaves a lasting impression.
+                                </p>
+                            </div>
+
+                            {/* Service 5: Award Functions */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaTrophy size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Award Functions</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Performances in renowned award ceremonies at National & International Platforms. High-energy acts designed for grand stages.
+                                </p>
+                            </div>
+
+                            {/* Service 6: Workshops & Training */}
+                            <div className="bg-neutral-900 border border-gray-800 hover:border-blue-600 p-8 transition-colors group">
+                                <div className="text-yellow-400 mb-6">
+                                    <FaChalkboardUser size={48} />
+                                </div>
+                                <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-blue-500 transition-colors">Workshops & Training</h3>
+                                <p className="text-gray-400 leading-relaxed">
+                                    Intensive dance workshops, masterclasses, and professional training programs for individuals and groups across all skill levels.
+                                </p>
                             </div>
                         </div>
                     </div>

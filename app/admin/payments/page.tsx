@@ -124,6 +124,7 @@ export default function AdminPaymentsPage() {
                                         <th className="px-6 py-4">Student</th>
                                         <th className="px-6 py-4">Course/Workshop</th>
                                         <th className="px-6 py-4">Amount</th>
+                                        <th className="px-6 py-4">UTR Number</th>
                                         <th className="px-6 py-4">Payment Date</th>
                                         <th className="px-6 py-4">Valid Until</th>
                                         <th className="px-6 py-4">Status</th>
@@ -156,6 +157,9 @@ export default function AdminPaymentsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 font-bold">₹{e.price}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-mono text-xs font-bold text-gray-700">{e.utrNumber || '-'}</div>
+                                            </td>
                                             <td className="px-6 py-4 text-gray-600">
                                                 {new Date(e.paymentDate || e.createdAt).toLocaleDateString()}
                                             </td>
@@ -185,7 +189,7 @@ export default function AdminPaymentsPage() {
                                     ))}
                                     {filteredEnrollments.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">No transactions found.</td>
+                                            <td colSpan={7} className="px-6 py-12 text-center text-gray-400 italic">No transactions found.</td>
                                         </tr>
                                     )}
                                 </tbody>
